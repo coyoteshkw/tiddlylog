@@ -40,9 +40,9 @@ jobs:
           mkdir -p output/static
           # 注意：这里的 tiddlywiki 命令如果是全局安装，直接用；如果是本地安装，用 npx tiddlywiki
           # 为了通用，这里假设你已经初始化了 wiki 文件夹
-          tiddlywiki main-wiki --render "$:/core/save/all" "index.html" "text/plain"
+          npx tiddlywiki main-wiki --render "$:/core/save/all" "index.html" "text/plain"
           mv index.html output/
-          tiddlywiki main-wiki --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
+          npx tiddlywiki main-wiki --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
           cp *.html output/static/ || true
 
           # 生成 Sitemap 的逻辑 (请记得替换你的 SITE_URL)
