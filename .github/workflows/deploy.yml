@@ -49,7 +49,7 @@ jobs:
           npx tiddlywiki main-wiki --output output/static --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
 
           # 4. 生成 Sitemap (这一步保持不变，但路径现在更整洁了)
-          SITE_URL="https://你的用户名.github.io/仓库名" # <--- 记得检查这里
+          SITE_URL="https://coyoteshkw.github.io/tiddlylog"
           echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > output/sitemap.xml
 
           # 遍历刚刚生成在 output/static 里的文件
