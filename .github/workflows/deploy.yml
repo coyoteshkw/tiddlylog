@@ -1,0 +1,64 @@
+name: Deploy TiddlyWiki to Pages
+
+on:
+  push:
+    branches:
+      - main
+
+# 权限设置：允许 Actions 修改 Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          # --- 核心优化 1：开启内置的 npm 缓存 ---
+          cache: "npm"
+
+      - name: Install TiddlyWiki
+        # --- 核心优化 2：如果没有 package.json，我们通过特定逻辑安装 ---
+        # 如果你仓库里有 package.json，直接用 npm install
+        run: |
+          if [ -f package.json ]; then
+            npm install
+          else
+            npm install -g tiddlywiki
+          fi
+
+      - name: Build Static Site and Sitemap
+        run: |
+          mkdir -p output/static
+          # 注意：这里的 tiddlywiki 命令如果是全局安装，直接用；如果是本地安装，用 npx tiddlywiki
+          # 为了通用，这里假设你已经初始化了 wiki 文件夹
+          tiddlywiki main-wiki --render "$:/core/save/all" "index.html" "text/plain"
+          mv index.html output/
+          tiddlywiki main-wiki --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
+          cp *.html output/static/ || true
+
+          # 生成 Sitemap 的逻辑 (请记得替换你的 SITE_URL)
+          SITE_URL="https://coyoteshkw.github.io/tiddlylog"
+          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > output/sitemap.xml
+          for file in output/static/*.html; do
+            filename=$(basename "$file")
+            encoded_name=$(echo "$filename" | sed 's/ /%20/g')
+            echo "<url><loc>${SITE_URL}/static/${encoded_name}</loc></url>" >> output/sitemap.xml
+          done
+          echo '</urlset>' >> output/sitemap.xml
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "output"
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
