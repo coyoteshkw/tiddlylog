@@ -37,31 +37,33 @@ jobs:
 
       - name: Build Static Site and Sitemap
         run: |
-          # 1. 准备最终的输出目录
-          mkdir -p output/static
+          # 1. 创建一个干净的输出目录
+          mkdir -p dist
 
-          # 2. 生成主 HTML (使用 --output 参数指定位置)
-          # 注意：--output 必须放在 --render 之前
-          npx tiddlywiki main-wiki --output output --render "$:/core/save/all" "index.html" "text/plain"
+          # 2. 生成主 index.html (利用你发现的 build 命令)
+          # 注意：--output 参数强制让它输出到我们准备好的 dist 文件夹
+          npx tiddlywiki main-wiki --output ../dist --build index
 
-          # 3. 生成静态各个文章页
-          # 同样使用 --output 参数，并指定到 static 子目录
-          npx tiddlywiki main-wiki --output output/static --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
+          # 3. 生成每个 Tiddler 的独立静态 HTML (直接放在 dist 根目录，网址更短)
+          # 我们把它们直接跟 index.html 放在一起，避免多一层 /static/ 路径
+          npx tiddlywiki main-wiki --output ../dist --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
 
-          # 4. 生成 Sitemap (这一步保持不变，但路径现在更整洁了)
+          # 4. 生成 Sitemap
           SITE_URL="https://coyoteshkw.github.io/tiddlylog"
-          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > output/sitemap.xml
-
-          # 遍历刚刚生成在 output/static 里的文件
-          for file in output/static/*.html; do
+          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > dist/sitemap.xml
+          for file in dist/*.html; do
             filename=$(basename "$file")
-            # 排除掉可能存在的 index.html (防止重复)
             if [ "$filename" != "index.html" ]; then
               encoded_name=$(echo "$filename" | sed 's/ /%20/g')
-              echo "  <url><loc>${SITE_URL}/static/${encoded_name}</loc></url>" >> output/sitemap.xml
+              echo "  <url><loc>${SITE_URL}/${encoded_name}</loc></url>" >> dist/sitemap.xml
             fi
           done
-          echo '</urlset>' >> output/sitemap.xml
+          echo '</urlset>' >> dist/sitemap.xml
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "dist" # <-- 确保上传的是我们新建的这个 dist 文件夹
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
