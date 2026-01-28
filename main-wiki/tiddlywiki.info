@@ -10,8 +10,6 @@
         "tiddlywiki/snowwhite"
     ],
 	"languages": [
-		"en-EN",
-		"zh-CN",
 		"zh-Hans"
 	],
     "build": {
