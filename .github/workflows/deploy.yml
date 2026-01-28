@@ -37,37 +37,32 @@ jobs:
 
       - name: Build Static Site and Sitemap
         run: |
-          # 1. 创建一个干净的输出目录
-          mkdir -p dist
+          # 1. 明确创建一个名为 output 的目录
+          mkdir -p output
 
-          # 2. 生成主 index.html (利用你发现的 build 命令)
-          # 注意：--output 参数强制让它输出到我们准备好的 dist 文件夹
-          npx tiddlywiki main-wiki --output ../dist --build index
+          # 2. 生成主 index.html
+          # 注意：--output 后面直接跟 output，它会在仓库根目录下创建该文件夹
+          npx tiddlywiki main-wiki --output output --build index
 
-          # 3. 生成每个 Tiddler 的独立静态 HTML (直接放在 dist 根目录，网址更短)
-          # 我们把它们直接跟 index.html 放在一起，避免多一层 /static/ 路径
-          npx tiddlywiki main-wiki --output ../dist --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
+          # 3. 生成每个 Tiddler 的独立静态 HTML (直接放在 output 根目录)
+          npx tiddlywiki main-wiki --output output --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
 
           # 4. 生成 Sitemap
           SITE_URL="https://coyoteshkw.github.io/tiddlylog"
-          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > dist/sitemap.xml
-          for file in dist/*.html; do
+          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > output/sitemap.xml
+          for file in output/*.html; do
             filename=$(basename "$file")
             if [ "$filename" != "index.html" ]; then
               encoded_name=$(echo "$filename" | sed 's/ /%20/g')
-              echo "  <url><loc>${SITE_URL}/${encoded_name}</loc></url>" >> dist/sitemap.xml
+              echo "  <url><loc>${SITE_URL}/${encoded_name}</loc></url>" >> output/sitemap.xml
             fi
           done
-          echo '</urlset>' >> dist/sitemap.xml
+          echo '</urlset>' >> output/sitemap.xml
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "dist" # <-- 确保上传的是我们新建的这个 dist 文件夹
-
-      - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
+          # --- 核心：确保这里也是 output ---
           path: "output"
 
       - name: Deploy to GitHub Pages
