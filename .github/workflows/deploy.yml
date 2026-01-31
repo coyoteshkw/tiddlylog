@@ -61,7 +61,6 @@ jobs:
 
       - name: Debug Output Structure
         run: |
-          echo "--- 检查 output 目录下的所有文件 ---"
           ls -R output
 
       - name: Deploy to GitHub Pages
