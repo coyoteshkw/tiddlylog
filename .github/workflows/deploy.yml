@@ -37,17 +37,16 @@ jobs:
 
       - name: Build Static Site and Sitemap
         run: |
-          # 1. 明确创建一个名为 output 的目录
           mkdir -p output
 
-          # 2. 生成主 index.html
-          # 注意：--output 后面直接跟 output，它会在仓库根目录下创建该文件夹
+          # 1. 生成首页 (这一步你之前就成功了)
           npx tiddlywiki main-wiki --output output --build index
 
-          # 3. 生成每个 Tiddler 的独立静态 HTML (直接放在 output 根目录)
-          npx tiddlywiki main-wiki --output output --render "[!is[system]!is[shadow]]" "[title].html" "text/plain" "$:/core/templates/static.tiddler.html"
+          # 2. 生成独立文章页 (注意这里的引号：我们使用单引号包裹整个参数)
+          # 我还添加了 all[tiddlers] 确保范围完整
+          npx tiddlywiki main-wiki --output output --render '[all[tiddlers]!is[system]!is[shadow]]' '[[title].html]' 'text/plain' '$:/core/templates/static.tiddler.html'
 
-          # 4. 生成 Sitemap
+          # 3. 生成 Sitemap
           SITE_URL="https://coyoteshkw.github.io/tiddlylog"
           echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > output/sitemap.xml
           for file in output/*.html; do
