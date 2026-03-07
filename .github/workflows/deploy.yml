@@ -36,40 +36,43 @@ jobs:
           fi
 
       - name: Build Static Site and Sitemap
+        shell: python
+        env:
+          SITE_URL: "https://coyoteshkw.github.io/tiddlylog"
         run: |
-          mkdir -p output
+          import os
+          import urllib.parse
 
-          # 1. 生成首页和静态文章
-          npx tiddlywiki main-wiki --output output --build index
-          npx tiddlywiki main-wiki --output output --build static
+          # 1. 将 static 目录下编码的文件名还原为中文 (解决 404)
+          path = 'output/static'
+          if os.path.exists(path):
+              for f in os.listdir(path):
+                  if '%' in f:
+                      old_path = os.path.join(path, f)
+                      new_path = os.path.join(path, urllib.parse.unquote(f))
+                      os.rename(old_path, new_path)
 
-          # 2. 【核心修复】将 static 目录下编码的文件名还原为中文
-          python3 -c "import os, urllib.parse; path='output/static'; [os.rename(os.path.join(path, f), os.path.join(path, urllib.parse.unquote(f))) for f in os.listdir(path) if '%' in f]"
-
-          # 3. 【核心修复】添加 .nojekyll 文件
-          touch output/.nojekyll
-
-          # 4. 生成 Sitemap (确保缩进垂直对齐)
-          SITE_URL="https://coyoteshkw.github.io/tiddlylog"
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > output/sitemap.xml
-          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> output/sitemap.xml
+          # 2. 生成标准的 Sitemap
+          site_url = os.environ['SITE_URL']
+          sitemap_path = 'output/sitemap.xml'
           
-          # 加入首页
-          echo "  <url><loc>${SITE_URL}/index.html</loc></url>" >> output/sitemap.xml
+          with open(sitemap_path, 'w', encoding='utf-8') as f:
+              f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+              f.write('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n')
+              # 添加首页
+              f.write(f'  <url><loc>{site_url}/index.html</loc></url>\n')
+              
+              # 添加所有静态文章 (进行 URL 编码)
+              if os.path.exists(path):
+                  for filename in sorted(os.listdir(path)):
+                      if filename.endswith('.html') and filename != 'static.html':
+                          encoded_name = urllib.parse.quote(filename)
+                          f.write(f'  <url><loc>{site_url}/static/{encoded_name}</loc></url>\n')
+              
+              f.write('</urlset>')
 
-          # 使用 Python 遍历并进行 URL 编码
-          python3 -c "
-import os, urllib.parse
-path = 'output/static'
-site_url = '${SITE_URL}/static'
-with open('output/sitemap.xml', 'a') as f:
-    files = sorted(os.listdir(path))
-    for filename in files:
-        if filename.endswith('.html') and filename != 'static.html':
-            encoded_name = urllib.parse.quote(filename)
-            f.write(f'  <url><loc>{site_url}/{encoded_name}</loc></url>\n')
-"
-          echo '</urlset>' >> output/sitemap.xml
+      - name: Debug Output Structure
+        run: ls -R output
 
       - name: Debug Output Structure
         run: |
