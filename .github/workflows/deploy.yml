@@ -50,18 +50,28 @@ jobs:
           # 3. 【核心修复】添加 .nojekyll 文件，防止 GitHub 拦截
           touch output/.nojekyll
 
-          # 4. 生成 Sitemap
-          SITE_URL="https://coyoteshkw.github.io/tiddlylog"
-          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > output/sitemap.xml
-          for file in output/static/*.html; do
-            filename=$(basename "$file")
-            if [[ "$filename" == *.html ]]; then
-              # 在站点地图里，我们需要保留 URL 编码
-              encoded_name=$(echo "$filename" | sed 's/ /%20/g')
-              echo "  <url><loc>${SITE_URL}/static/${encoded_name}</loc></url>" >> output/sitemap.xml
-            fi
-          done
-          echo '</urlset>' >> output/sitemap.xml
+        # 4. 生成 Sitemap (使用 Python 确保 URL 完全符合 Google 编码规范)
+                  SITE_URL="https://coyoteshkw.github.io/tiddlylog"
+                  echo '<?xml version="1.0" encoding="UTF-8"?>' > output/sitemap.xml
+                  echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> output/sitemap.xml
+                  
+                  # 加入首页
+                  echo "  <url><loc>${SITE_URL}/index.html</loc></url>" >> output/sitemap.xml
+
+                  # 使用 Python 遍历 static 目录并进行 UTF-8 URL 编码
+                  python3 -c "
+        import os, urllib.parse
+        path = 'output/static'
+        site_url = '${SITE_URL}/static'
+        with open('output/sitemap.xml', 'a') as f:
+            # 按照文件名排序，确保生成的 xml 顺序稳定
+            for filename in sorted(os.listdir(path)):
+                if filename.endswith('.html') and filename != 'static.html':
+                    # 关键：将中文文件名转换为 %E9%9B... 这种百分比编码
+                    encoded_name = urllib.parse.quote(filename)
+                    f.write(f'  <url><loc>{site_url}/{encoded_name}</loc></url>\n')
+        "
+                  echo '</urlset>' >> output/sitemap.xml
 
       - name: Debug Output Structure
         run: |
