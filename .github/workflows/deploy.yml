@@ -45,7 +45,7 @@ jobs:
 
           # 2. 【核心修复】将 static 目录下编码的文件名还原为中文
           # 使用 Python 进行快速重命名，解决 404 问题
-          # python3 -c "import os, urllib.parse; path='output/static'; [os.rename(os.path.join(path, f), os.path.join(path, urllib.parse.unquote(f))) for f in os.listdir(path) if '%' in f]"
+          python3 -c "import os, urllib.parse; path='output/static'; [os.rename(os.path.join(path, f), os.path.join(path, urllib.parse.unquote(f))) for f in os.listdir(path) if '%' in f]"
 
           # 3. 【核心修复】添加 .nojekyll 文件，防止 GitHub 拦截
           touch output/.nojekyll
