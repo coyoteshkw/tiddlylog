@@ -1,0 +1,108 @@
+/* 只有带 RainWorld 标签的 Tiddler 会生效 */
+.tc-tiddler-frame.tc-tagged-RainWorld {
+    background-color: #121212 !important; /* 深邃底色 */
+    background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                      linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 3px 100%; /* 模拟微弱扫描线 */
+    border: 2px solid #4a3c31;
+    border-radius: 4px;
+    box-shadow: inset 0 0 20px #000, 0 5px 15px rgba(0,0,0,0.5);
+    color: #b0a494; /* 褪色的旧纸张色 */
+    position: relative;
+    overflow: hidden;
+}
+
+/* 标题样式：模拟珍珠或监视者的发光 */
+.tc-tiddler-frame.tc-tagged-RainWorld .tc-title {
+    color: #e0d1b1;
+    text-shadow: 0 0 8px rgba(224, 209, 177, 0.6);
+    letter-spacing: 1px;
+}
+
+/* 链接样式：荧光绿/蓝提示色 */
+.tc-tiddler-frame.tc-tagged-RainWorld a {
+    color: #52ffb8 !important;
+    text-shadow: 0 0 2px #52ffb8;
+    transition: all 0.3s ease;
+}
+
+.tc-tiddler-frame.tc-tagged-RainWorld a:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 10px #52ffb8;
+}
+
+/* 侧边装饰：模拟业力符号的极简线条 */
+.tc-tiddler-frame.tc-tagged-RainWorld::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #4a3c31;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* 1. 加粗 (Strong) - 模拟重要警告或业力符号的亮度 */
+.tc-tiddler-frame.tc-tagged-RainWorld strong {
+    color: #ffca28; /* 琥珀色，类似业力花或监视者的核心 */
+    font-weight: 700;
+    text-shadow: 0 0 6px rgba(255, 202, 40, 0.5);
+    padding: 0 2px;
+}
+
+/* 2. 斜体 (Emphasis) - 模拟虚弱、远古的回响或潜意识 */
+.tc-tiddler-frame.tc-tagged-RainWorld em {
+    color: #a78bfa; /* 淡淡的紫色，像记忆地穴里的微光 */
+    font-style: normal;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+}
+
+/* 3. 引用块 (Blockquote) - 模拟全息通信日志 */
+.tc-tiddler-frame.tc-tagged-RainWorld blockquote {
+    background: rgba(20, 20, 20, 0.6) !important;
+    /* 核心修改：给左边框增加发光感 */
+    border-left: 4px solid #fab !important;
+    border-radius: 2px;
+    padding: 12px 20px;
+    margin: 25px 10px 20px 10px; /* 稍微增加了顶部间距，防止标签发光被遮挡 */
+    position: relative;
+    font-family: "JetBrains Mono", "Courier New", monospace;
+    color: #9ca3af;
+    /* 双重阴影：内部深色凹陷 + 外部粉色微光 */
+    box-shadow: inset 5px 0 15px rgba(0, 0, 0, 0.4), 
+                -2px 0 10px rgba(255, 170, 187, 0.3); 
+    /* 文字也带一点点极其微弱的扩散感 */
+    text-shadow: 0 0 2px rgba(156, 163, 175, 0.2);
+}
+
+/* 引用块的左上角点缀：INFO 标签发光 */
+.tc-tiddler-frame.tc-tagged-RainWorld blockquote::before {
+    content: "INFO";
+    position: absolute;
+    top: -12px;
+    left: 10px;
+    font-size: 0.7em;
+    background: #fab;
+    color: #121212;
+    padding: 0 6px;
+    border-radius: 2px;
+    font-weight: bold;
+    /* 核心修改：给标签增加呼吸感的发光效果 */
+    box-shadow: 0 0 8px #fab, 
+                0 0 15px rgba(255, 170, 187, 0.4);
+    /* 确保标签文字清晰，不加发光 */
+    text-shadow: none;
+    z-index: 1;
+}
+
+/* 4. 代码行内样式 (Inline Code) - 模拟终端指令 */
+.tc-tiddler-frame.tc-tagged-RainWorld code {
+    background-color: #262626 !important;
+    color: #52ffb8 !important; /* 荧光绿 */
+    border: 1px solid #333;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
