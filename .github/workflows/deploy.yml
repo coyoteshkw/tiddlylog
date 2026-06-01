@@ -50,18 +50,24 @@ jobs:
           # 3. 【核心修复】添加 .nojekyll 文件，防止 GitHub 拦截
           touch output/.nojekyll
 
-          # 4. 生成 Sitemap
+          # 4. 生成 Sitemap（对文件名做完整 URL 编码，符合 sitemaps.org 规范）
           SITE_URL="https://coyoteshkw.github.io/tiddlylog"
           echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' > output/sitemap.xml
           for file in output/static/*.html; do
             filename=$(basename "$file")
             if [[ "$filename" == *.html ]]; then
-              # 在站点地图里，我们需要保留 URL 编码
-              encoded_name=$(echo "$filename" | sed 's/ /%20/g')
+              encoded_name=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$filename")
               echo "  <url><loc>${SITE_URL}/static/${encoded_name}</loc></url>" >> output/sitemap.xml
             fi
           done
           echo '</urlset>' >> output/sitemap.xml
+
+          # 5. 生成 robots.txt 并指向 sitemap
+          {
+            echo "User-agent: *"
+            echo "Allow: /"
+            echo "Sitemap: ${SITE_URL}/sitemap.xml"
+          } > output/robots.txt
 
       - name: Debug Output Structure
         run: ls -R output
